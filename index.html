@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>靜謐的一日</title>
+  <style>
+    :root {
+      --bg: #f8f5ef;
+      --card: #ffffffcc;
+      --text: #332f2a;
+      --muted: #7a7268;
+      --line: #e7dfd3;
+      --dark: #4b4640;
+      --soft: #eee7db;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    header {
+      background: linear-gradient(135deg, #fff, #eee7db);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 28px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.04);
+    }
+    .date { color: var(--muted); font-size: 14px; }
+    h1 { margin: 8px 0 6px; font-size: 34px; letter-spacing: .03em; }
+    h2 { margin: 0 0 10px; font-size: 22px; }
+    .sub { color: var(--muted); margin: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.035);
+    }
+    .full { grid-column: 1 / -1; }
+    button, input, select, textarea {
+      font: inherit;
+    }
+    .task, .water {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 18px;
+      padding: 14px 16px;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+    .done {
+      opacity: .48;
+      text-decoration: line-through;
+    }
+    .check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #cfc6ba;
+      display: grid;
+      place-items: center;
+      color: transparent;
+      flex: 0 0 auto;
+    }
+    .active .check {
+      background: var(--dark);
+      border-color: var(--dark);
+      color: white;
+    }
+    .progress {
+      height: 9px;
+      background: var(--soft);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 14px 0;
+    }
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: var(--dark);
+      transition: width .2s;
+    }
+    .chips {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .chip {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 16px;
+      padding: 10px;
+      cursor: pointer;
+    }
+    .chip.selected {
+      background: var(--dark);
+      color: white;
+      border-color: var(--dark);
+    }
+    label { display: block; color: var(--muted); font-size: 14px; margin-bottom: 6px; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      padding: 12px 14px;
+      outline: none;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    .three {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 26px 0 10px;
+      font-size: 14px;
+    }
+    @media (max-width: 720px) {
+      .grid, .three { grid-template-columns: 1fr; }
+      h1 { font-size: 30px; }
+      .wrap { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div class="date" id="today"></div>
+      <h1>靜謐的一日</h1>
+      <p class="sub" id="prompt">今天不需要很厲害，只要安穩地完成一小步。</p>
+    </header>
+
+    <section class="grid">
+      <div class="card full">
+        <h2>今日四件小事</h2>
+        <p class="sub">工作、身體、靈性、月白靜物，各留一點位置。</p>
+        <div class="progress"><div class="bar" id="bar"></div></div>
+        <p class="sub" id="progressText">完成度 0%</p>
+        <div id="tasks"></div>
+      </div>
+
+      <div class="card">
+        <h2>現在的我</h2>
+        <div class="chips" id="moods"></div>
+        <p class="sub" id="moodText">今天的狀態：平靜</p>
+      </div>
+
+      <div class="card">
+        <h2>番茄鐘</h2>
+        <div class="chips" id="timers"></div>
+        <p class="sub">先選一段時間，做完就休息，不逼自己連續衝刺。</p>
+      </div>
+
+      <div class="card">
+        <h2>喝水紀錄</h2>
+        <p class="sub">不追求喝很多，只提醒自己慢慢補水。</p>
+        <button class="water" id="waterMorning">
+          <span><strong>上午 700ml</strong><br><small>上班前半段</small></span>
+          <span class="check">✓</span>
+        </button>
+        <button class="water" id="waterAfternoon">
+          <span><strong>下午 700ml</strong><br><small>下班前慢慢喝完</small></span>
+          <span class="check">✓</span>
+        </button>
+      </div>
+
+      <div class="card">
+        <h2>生理期紀錄</h2>
+        <label>開始日期</label>
+        <input type="date" id="periodDate" />
+        <label>經血量</label>
+        <select id="flow">
+          <option>少量</option>
+          <option>普通</option>
+          <option>偏多</option>
+          <option>很多</option>
+        </select>
+        <label>疼痛感</label>
+        <select id="pain">
+          <option>無</option>
+          <option>輕微</option>
+          <option>明顯</option>
+          <option>需要休息</option>
+        </select>
+      </div>
+
+      <div class="card full">
+        <h2>靜的日誌</h2>
+        <textarea id="journal" placeholder="今天發生了什麼？身體有沒有累？有沒有一件值得感謝的小事？"></textarea>
+      </div>
+    </section>
+
+    <footer>願今天的妳，不必逞強，也能慢慢完成。</footer>
+  </main>
+
+  <script>
+    const key = "jingMoonDailyDataV1";
+    const defaultData = {
+      tasks: [
+        { label: "完成一件最重要的公文", group: "工作", done: false },
+        { label: "吃藥、喝水、讓身體慢一點", group: "身體", done: false },
+        { label: "地藏經 / 楞嚴心咒 / 迴向姍姍", group: "靈性", done: false },
+        { label: "整理一張月白靜物照片或文案", group: "月白靜物", done: false }
+      ],
+      mood: "平靜",
+      timer: "25 分",
+      waterMorning: false,
+      waterAfternoon: false,
+      periodDate: "",
+      flow: "普通",
+      pain: "輕微",
+      journal: ""
+    };
+    let data = JSON.parse(localStorage.getItem(key) || "null") || defaultData;
+    const save = () => localStorage.setItem(key, JSON.stringify(data));
+
+    const prompts = [
+      "今天不需要很厲害，只要安穩地完成一小步。",
+      "先照顧自己，再處理世界。",
+      "妳可以慢一點，事情仍然會一件一件完成。",
+      "把力氣留給真正重要的人與事。"
+    ];
+
+    document.getElementById("today").textContent = new Intl.DateTimeFormat("zh-TW", {
+      month: "long", day: "numeric", weekday: "long"
+    }).format(new Date());
+    document.getElementById("prompt").textContent = prompts[new Date().getDate() % prompts.length];
+
+    function renderTasks() {
+      const box = document.getElementById("tasks");
+      box.innerHTML = "";
+      data.tasks.forEach((task, index) => {
+        const btn = document.createElement("button");
+        btn.className = "task" + (task.done ? " active" : "");
+        btn.innerHTML = `<span class="${task.done ? "done" : ""}"><strong>${task.label}</strong><br><small>${task.group}</small></span><span class="check">✓</span>`;
+        btn.onclick = () => {
+          data.tasks[index].done = !data.tasks[index].done;
+          save();
+          renderTasks();
+        };
+        box.appendChild(btn);
+      });
+      const done = data.tasks.filter(t => t.done).length;
+      const percent = Math.round(done / data.tasks.length * 100);
+      document.getElementById("bar").style.width = percent + "%";
+      document.getElementById("progressText").textContent = "完成度 " + percent + "%";
+    }
+
+    function renderChips(id, items, selected, onPick) {
+      const box = document.getElementById(id);
+      box.innerHTML = "";
+      items.forEach(item => {
+        const btn = document.createElement("button");
+        btn.className = "chip" + (item === selected ? " selected" : "");
+        btn.textContent = item;
+        btn.onclick = () => onPick(item);
+        box.appendChild(btn);
+      });
+    }
+
+    function renderMood() {
+      renderChips("moods", ["平靜", "疲憊", "想哭", "有力氣"], data.mood, item => {
+        data.mood = item;
+        save();
+        renderMood();
+      });
+      document.getElementById("moodText").textContent = "今天的狀態：" + data.mood;
+    }
+
+    function renderTimer() {
+      renderChips("timers", ["15 分", "25 分", "40 分", "休息"], data.timer, item => {
+        data.timer = item;
+        save();
+        renderTimer();
+      });
+    }
+
+    function bindWater(id, prop) {
+      const el = document.getElementById(id);
+      const update = () => el.className = "water" + (data[prop] ? " active" : "");
+      el.onclick = () => {
+        data[prop] = !data[prop];
+        save();
+        update();
+      };
+      update();
+    }
+
+    function bindInput(id, prop) {
+      const el = document.getElementById(id);
+      el.value = data[prop] || "";
+      el.oninput = () => {
+        data[prop] = el.value;
+        save();
+      };
+    }
+
+    renderTasks();
+    renderMood();
+    renderTimer();
+    bindWater("waterMorning", "waterMorning");
+    bindWater("waterAfternoon", "waterAfternoon");
+    bindInput("periodDate", "periodDate");
+    bindInput("flow", "flow");
+    bindInput("pain", "pain");
+    bindInput("journal", "journal");
+  </script>
+</body>
+</html>
