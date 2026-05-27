@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>靜謐的一日</title>
+  <style>
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;background:#f8f5ef;color:#332f2a}
+    main{max-width:920px;margin:auto;padding:16px}
+    section,header{background:#ffffffcc;border:1px solid #e7dfd3;border-radius:24px;padding:20px;margin:14px 0;box-shadow:0 6px 18px #0000000a}
+    h1{font-size:32px;margin:6px 0} h2{margin:0 0 10px} h3{margin:0}
+    p{color:#756d63}.row{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid #e7dfd3;background:white;border-radius:18px;padding:12px;margin:10px 0}
+    button{font:inherit}.btn{width:100%;text-align:left;cursor:pointer}
+    .done{opacity:.45;text-decoration:line-through}.check{font-weight:bold}
+    input,select,textarea{width:100%;box-sizing:border-box;border:1px solid #e7dfd3;border-radius:14px;padding:11px;font:inherit;background:white;margin:6px 0 12px}
+    textarea{min-height:100px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}
+    .chip{border:1px solid #e7dfd3;background:white;border-radius:14px;padding:10px;margin:4px;cursor:pointer}.selected{background:#4b4640;color:white}
+    .barbox{height:10px;background:#eee7db;border-radius:999px;overflow:hidden}.bar{height:100%;background:#4b4640;width:0%}
+    .big{font-size:28px;font-weight:700;color:#332f2a}.ok{color:#45624d}.warn{color:#8a5a44}
+    small{color:#756d63}.note{background:#f5efe5;border:1px solid #e7dfd3;border-radius:16px;padding:12px;color:#756d63;font-size:14px}
+    .money-input{max-width:135px;margin:0;text-align:right}
+    .tag{display:inline-block;background:#eee7db;border-radius:999px;padding:3px 9px;margin-top:4px;color:#756d63;font-size:12px}
+    @media(max-width:720px){.grid{grid-template-columns:1fr}.row{align-items:flex-start}.money-input{max-width:120px}}
+  </style>
+</head>
+<body>
+<main>
+<header>
+  <small id="today"></small>
+  <h1>靜謐的一日</h1>
+  <p>今天不需要很厲害，只要安穩地完成一小步。</p>
+</header>
+
+<section>
+  <h2>今日四件小事</h2>
+  <div class="barbox"><div class="bar" id="taskBar"></div></div>
+  <p id="taskProgress">完成度 0%</p>
+  <div id="tasks"></div>
+</section>
+
+<div class="grid">
+<section>
+  <h2>現在的我</h2>
+  <div id="moods"></div>
+  <p id="moodText"></p>
+</section>
+
+<section>
+  <h2>喝水紀錄</h2>
+  <button class="row btn" onclick="toggleWater('morning')"><span>上午 700ml<br><small>上班前半段</small></span><span id="morningCheck">○</span></button>
+  <button class="row btn" onclick="toggleWater('afternoon')"><span>下午 700ml<br><small>下班前慢慢喝完</small></span><span id="afternoonCheck">○</span></button>
+</section>
+
+<section>
+  <h2>生理期紀錄</h2>
+  <label>開始日期</label><input id="periodDate" type="date">
+  <label>經血量</label><select id="flow"><option>少量</option><option>普通</option><option>偏多</option><option>很多</option></select>
+  <label>疼痛感</label><select id="pain"><option>無</option><option>輕微</option><option>明顯</option><option>需要休息</option></select>
+</section>
+
+<section>
+  <h2>番茄鐘</h2>
+  <div id="timers"></div>
+</section>
+</div>
+
+<section>
+  <h2>每月固定金流</h2>
+  <p>依照妳之前整理過的固定配置。金額可直接修改。</p>
+  <label>每月收入</label><input id="income" type="number">
+  <div class="row">
+    <span>固定配置後剩餘<br><small>這裡是扣除固定支出後的餘裕</small></span>
+    <span class="big" id="monthLeft"></span>
+  </div>
+  <div class="barbox"><div class="bar" id="monthBar"></div></div>
+  <p id="monthText"></p>
+  <div id="monthlyItems"></div>
+</section>
+
+<section>
+  <h2>五週制信封預算</h2>
+  <p>2026/03 正式版：每月可動用 NT$11,000。每週生活信封 NT$2,000 × 5 週，本月緩衝 NT$1,000。</p>
+
+  <div class="grid">
+    <div>
+      <label>每月可動用</label><input id="flexMonth" type="number">
+    </div>
+    <div>
+      <label>本月緩衝</label><input id="bufferMonth" type="number">
+    </div>
+  </div>
+
+  <div class="row">
+    <span>本週信封剩餘<br><small>五袋合計上限 NT$2,000</small></span>
+    <span class="big" id="envelopeLeft"></span>
+  </div>
+  <div class="barbox"><div class="bar" id="envelopeBar"></div></div>
+  <p id="envelopeText"></p>
+
+  <div id="envelopes"></div>
+
+  <div class="row">
+    <span>本月緩衝剩餘<br><small>只在信封不足時使用</small></span>
+    <span class="big" id="bufferLeft"></span>
+  </div>
+  <label>本月已使用緩衝</label><input id="bufferUsed" type="number">
+
+  <div class="note">緩衝規則：只在信封不足時使用。沒用完可轉黃金袋 NT$500，或全轉三萬袋。</div>
+</section>
+
+<section>
+  <h2>三萬進度</h2>
+  <p>月光沉澱袋：每週 NT$400 × 5 週 = NT$2,000／月。NT$6,000 一袋，約 3 個月完成一袋；五袋約 15 個月。</p>
+  <label>三萬袋目前累積</label><input id="thirtyK" type="number">
+  <div class="row"><span>距離 NT$30,000 還差</span><span class="big" id="thirtyLeft"></span></div>
+  <div class="barbox"><div class="bar" id="thirtyBar"></div></div>
+  <p id="thirtyText"></p>
+</section>
+
+
+<section id="weekendChores" style="display:none">
+  <h2>週末家事提醒</h2>
+  <p>今天是週末，先做必要的，不需要把家裡整理到完美。</p>
+  <div id="chores"></div>
+  <div class="note">提醒：週末家事是為了讓生活恢復一點秩序，不是拿來責備自己的。</div>
+</section>
+
+<section>
+  <h2>靜的日誌</h2>
+  <textarea id="journal" placeholder="今天發生了什麼？身體有沒有累？有沒有一件值得感謝的小事？"></textarea>
+</section>
+</main>
+
+<script>
+const key="jingMoonDailyEnvelopeV5";
+const defaults={
+ tasks:[
+  ["完成一件最重要的公文","工作",false],
+  ["吃藥、喝水、讓身體慢一點","身體",false],
+  ["地藏經 / 楞嚴心咒 / 迴向姍姍","靈性",false],
+  ["整理一張月白靜物照片或文案","月白靜物",false]
+ ],
+ mood:"平靜",timer:"25 分",morning:false,afternoon:false,periodDate:"",flow:"普通",pain:"輕微",journal:"",
+ income:56138,
+ flexMonth:11000,
+ bufferMonth:1000,
+ bufferUsed:0,
+ thirtyK:0,
+ monthly:[
+  ["給娘家","固定支持",5000],
+  ["給妹妹","預設 3,000–5,000 中間值",4000],
+  ["與先生共同基金","家庭共同配置",10000],
+  ["禕禕教育基金","長期儲蓄",10000],
+  ["黃金存摺","固定投入",3000],
+  ["股票投資","固定投入",3000],
+  ["世界展望會","固定捐款",3700],
+  ["五週制可動用預算","生活信封 10,000＋本月緩衝 1,000",11000]
+ ],
+ envelopes:[
+  ["日常餐桌","早餐店、偶爾外食、便利商店、加菜",700,0],
+  ["靜謐自己","面膜、精油、小保養補貨、小型美容支出",300,0],
+  ["個人風格","耳環、絲襪、小飾品、二手小物",400,0],
+  ["微光幸福","咖啡、小零食、突然想吃的",200,0],
+  ["月光沉澱","不動、月底累積、進三萬袋",400,0]
+ ],
+ chores:[
+  ["洗衣服 / 曬衣服","先處理最急的衣物",false],
+  ["掃地或吸地","只做主要活動區域也可以",false],
+  ["浴室簡單刷洗","洗手台、馬桶、地板擇一也算完成",false],
+  ["補衛生紙與日用品","確認家裡這週會用到的東西",false],
+  ["整理包包與制服 / 上班用品","讓下週一比較不慌",false],
+  ["月白靜物小整理","照片、包材、作品區，十分鐘即可",false]
+ ]
+};
+let saved=JSON.parse(localStorage.getItem(key)||"{}");
+let data=Object.assign({},defaults,saved);
+if(!saved.monthly){data.monthly=defaults.monthly}
+if(!saved.envelopes){data.envelopes=defaults.envelopes}
+if(!saved.chores){data.chores=defaults.chores}
+function save(){localStorage.setItem(key,JSON.stringify(data))}
+function money(n){return "NT$ "+Number(n||0).toLocaleString("zh-TW")}
+today.textContent=new Intl.DateTimeFormat("zh-TW",{month:"long",day:"numeric",weekday:"long"}).format(new Date());
+
+function renderTasks(){
+ tasks.innerHTML="";
+ data.tasks.forEach((t,i)=>{
+  const b=document.createElement("button");
+  b.className="row btn";
+  b.innerHTML=`<span class="${t[2]?'done':''}"><b>${t[0]}</b><br><small>${t[1]}</small></span><span class="check">${t[2]?'✓':'○'}</span>`;
+  b.onclick=()=>{data.tasks[i][2]=!data.tasks[i][2];save();renderTasks()};
+  tasks.appendChild(b);
+ });
+ const done=data.tasks.filter(t=>t[2]).length, pct=Math.round(done/data.tasks.length*100);
+ taskBar.style.width=pct+"%"; taskProgress.textContent="完成度 "+pct+"%";
+}
+function chips(id,arr,prop){
+ const box=document.getElementById(id); box.innerHTML="";
+ arr.forEach(x=>{const b=document.createElement("button");b.className="chip "+(data[prop]===x?"selected":"");b.textContent=x;b.onclick=()=>{data[prop]=x;save();renderAll()};box.appendChild(b)})
+}
+function toggleWater(p){data[p]=!data[p];save();renderAll()}
+function bind(id,prop){const el=document.getElementById(id);el.value=data[prop]??"";el.oninput=()=>{data[prop]=el.type==="number"?Number(el.value||0):el.value;save();renderMoney()}}
+function renderMoney(){
+ const fixed=data.monthly.reduce((s,x)=>s+Number(x[2]||0),0), income=Number(data.income||0);
+ const left=income-fixed, pct=income?Math.min(100,Math.round(fixed/income*100)):0;
+ monthLeft.textContent=money(left); monthLeft.className="big "+(left>=0?"ok":"warn");
+ monthBar.style.width=pct+"%"; monthText.textContent=`固定配置 ${money(fixed)}，占收入 ${pct}%`;
+ monthlyItems.innerHTML="";
+ data.monthly.forEach((m,i)=>{
+  const div=document.createElement("div");div.className="row";
+  div.innerHTML=`<span><b>${m[0]}</b><br><small>${m[1]}</small></span><input class="money-input" type="number" value="${m[2]}">`;
+  div.querySelector("input").oninput=e=>{data.monthly[i][2]=Number(e.target.value||0);save();renderMoney()};
+  monthlyItems.appendChild(div)
+ });
+
+ const budget=data.envelopes.reduce((s,x)=>s+Number(x[2]||0),0);
+ const used=data.envelopes.reduce((s,x)=>s+Number(x[3]||0),0);
+ const remain=budget-used, pct2=budget?Math.min(100,Math.round(used/budget*100)):0;
+ envelopeLeft.textContent=money(remain); envelopeLeft.className="big "+(remain>=0?"ok":"warn");
+ envelopeBar.style.width=pct2+"%"; envelopeText.textContent=`本週已使用 ${money(used)}／${money(budget)}，使用 ${pct2}%`;
+ envelopes.innerHTML="";
+ data.envelopes.forEach((e,i)=>{
+  const div=document.createElement("div");div.className="row";
+  const remainOne=Number(e[2])-Number(e[3]);
+  div.innerHTML=`<span><b>${e[0]}：${money(e[2])}</b><br><small>${e[1]}</small><br><span class="tag">剩餘 ${money(remainOne)}</span></span><input class="money-input" type="number" value="${e[3]}">`;
+  div.querySelector("input").oninput=ev=>{data.envelopes[i][3]=Number(ev.target.value||0);save();renderMoney()};
+  envelopes.appendChild(div)
+ });
+
+ const bufferRemain=Number(data.bufferMonth||0)-Number(data.bufferUsed||0);
+ bufferLeft.textContent=money(bufferRemain); bufferLeft.className="big "+(bufferRemain>=0?"ok":"warn");
+
+ const thirty=Number(data.thirtyK||0);
+ const thirtyRemain=30000-thirty;
+ const thirtyPct=Math.min(100,Math.round(thirty/30000*100));
+ thirtyLeft.textContent=money(thirtyRemain);
+ thirtyBar.style.width=thirtyPct+"%";
+ thirtyText.textContent=`已累積 ${money(thirty)}，完成 ${thirtyPct}%。以每月 NT$2,000 沉澱，約 ${Math.max(0,Math.ceil(thirtyRemain/2000))} 個月可達成。`;
+}
+
+function renderChores(){
+ const day=new Date().getDay();
+ const isWeekend=day===0||day===6;
+ const box=document.getElementById("weekendChores");
+ if(!box){return}
+ box.style.display=isWeekend?"block":"none";
+ if(!isWeekend){return}
+ chores.innerHTML="";
+ data.chores.forEach((c,i)=>{
+  const b=document.createElement("button");
+  b.className="row btn";
+  b.innerHTML=`<span class="${c[2]?'done':''}"><b>${c[0]}</b><br><small>${c[1]}</small></span><span class="check">${c[2]?'✓':'○'}</span>`;
+  b.onclick=()=>{data.chores[i][2]=!data.chores[i][2];save();renderChores()};
+  chores.appendChild(b);
+ });
+}
+
+function renderAll(){
+ renderTasks();
+ chips("moods",["平靜","疲憊","想哭","有力氣"],"mood"); moodText.textContent="今天的狀態："+data.mood;
+ chips("timers",["15 分","25 分","40 分","休息"],"timer");
+ morningCheck.textContent=data.morning?"✓":"○"; afternoonCheck.textContent=data.afternoon?"✓":"○";
+ renderMoney();
+ renderChores();
+}
+["periodDate","flow","pain","journal","income","flexMonth","bufferMonth","bufferUsed","thirtyK"].forEach(id=>bind(id,id));
+renderAll();
+</script>
+</body>
+</html>
+
+
+<!-- 第一批修正已加入 -->
