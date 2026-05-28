@@ -1,79 +1,114 @@
 <!doctype html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Jing’s</title>
-<meta name="apple-mobile-web-app-title" content="Jing’s">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#F8F5EF">
-<link rel="apple-touch-icon" href="jing-icon-180.png">
-<link rel="icon" href="jing-icon-180.png">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel='apple-touch-icon' href='jing-icon-180.png'>
+<link rel='manifest' href='manifest.webmanifest'>
 <style>
-:root{--bg:#f8f5ef;--card:#ffffffcc;--text:#332f2a;--muted:#756d63;--line:#e7dfd3;--dark:#4b4640;--soft:#eee7db;--ok:#45624d;--warn:#8a5a44}
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;background:var(--bg);color:var(--text)}
-main{max-width:940px;margin:auto;padding:16px}header,section{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:20px;margin:14px 0;box-shadow:0 6px 18px #0000000a}
-h1{font-size:34px;margin:6px 0}h2{margin:0 0 10px;font-size:22px}h3{margin:0;font-size:16px}p,small{color:var(--muted)}small{font-size:13px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.row{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid var(--line);background:white;border-radius:18px;padding:12px;margin:10px 0}
-.btn{width:100%;text-align:left;cursor:pointer}button{font:inherit;border:0}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:11px;font:inherit;background:white;margin:6px 0 12px;color:var(--text)}
-textarea{min-height:110px;resize:vertical}.chip{display:inline-block;border:1px solid var(--line);background:white;border-radius:14px;padding:10px;margin:4px;cursor:pointer;color:var(--text)}
-.selected,.tab.active{background:var(--dark);color:white;border-color:var(--dark)}.done{opacity:.45;text-decoration:line-through}.check{font-weight:bold}.barbox{height:10px;background:var(--soft);border-radius:999px;overflow:hidden}.bar{height:100%;background:var(--dark);width:0%}
-.big{font-size:28px;font-weight:700}.ok{color:var(--ok)}.warn{color:var(--warn)}.note{background:#f5efe5;border:1px solid var(--line);border-radius:16px;padding:12px;color:var(--muted);font-size:14px}.money-input{max-width:135px;margin:0;text-align:right}.tag{display:inline-block;background:var(--soft);border-radius:999px;padding:3px 9px;margin-top:4px;color:var(--muted);font-size:12px}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.tab{border:1px solid var(--line);background:white;border-radius:16px;padding:10px;cursor:pointer}.page{display:none}.page.active{display:block}.soft-hide{opacity:.38}
-@media(max-width:720px){.grid,.tabs{grid-template-columns:1fr}.row{align-items:flex-start}.money-input{max-width:120px}}
-</style>
-</head>
+body{font-family:-apple-system;background:#F7F3EC;color:#3B3835;max-width:720px;margin:auto;padding:20px}
+section{background:#FFFCF8;border:1px solid #E6DED2;border-radius:28px;padding:24px;margin:18px 0}
+button,input{font:inherit} input{width:100%;padding:14px;border-radius:18px;border:1px solid #E6DED2}
+.row{display:flex;justify-content:space-between;align-items:center;border:1px solid #E6DED2;border-radius:20px;padding:14px;margin:10px 0}
+.chip{padding:10px 14px;border-radius:999px;border:1px solid #E6DED2;background:white;margin:4px}
+.active{background:#4A4743;color:white}
+small{color:#7A746D}
+</style></head>
 <body>
-<main>
-<header><small id="today"></small><h1>Jing’s</h1><p id="dailyPrompt">今天不用追回昨天。</p></header>
-<div class="tabs"><button class="tab active" onclick="showPage('todayPage',this)">今天</button><button class="tab" onclick="showPage('weekPage',this)">本週</button><button class="tab" onclick="showPage('longPage',this)">長期</button><button class="tab" onclick="showPage('notePage',this)">手帳</button></div>
+<h1>Jing’s</h1>
+<p id='quote'></p>
 
-<div id="todayPage" class="page active">
-<section><h2>今天的我</h2><div id="freezeStates"></div><p id="freezeText"></p></section>
-<section><h2>今天最重要的一件事</h2><input id="oneThing" placeholder="今天只寫一件就好。"><button class="row btn" onclick="toggleSimple('oneThingDone')"><span>這件事完成了</span><span id="oneThingDoneCheck">○</span></button></section>
-<section><h2>最基本照顧</h2><div id="basicCare"></div></section>
-<section><h2>喝水紀錄</h2><button class="row btn" onclick="toggleSimple('morning')"><span>上午 700ml<br><small>上班前半段</small></span><span id="morningCheck">○</span></button><button class="row btn" onclick="toggleSimple('afternoon')"><span>下午 700ml<br><small>下班前慢慢喝完</small></span><span id="afternoonCheck">○</span></button></section>
-<section><h2>工作耗能</h2><div id="energyStates"></div><p id="energyText"></p><div class="note" id="energyNote"></div></section>
-<section><h2>恢復模式</h2><p>真的很累時，只保留必要照顧。</p><button id="recoveryToggle" class="chip">關閉</button><div class="note">恢復模式不是放棄，是保護自己。</div></section>
-</div>
+<section>
+<h2>今天的我</h2>
+<div id='moods'></div>
+</section>
 
-<div id="weekPage" class="page">
-<section><h2>五週制信封預算</h2><p>每月可動用 NT$11,000。每週生活信封 NT$2,000 × 5 週，本月緩衝 NT$1,000。</p><div class="grid"><div><label>每月可動用</label><input id="flexMonth" type="number"></div><div><label>本月緩衝</label><input id="bufferMonth" type="number"></div></div><div class="row"><span>本週信封剩餘<br><small>五袋合計上限 NT$2,000</small></span><span class="big" id="envelopeLeft"></span></div><div class="barbox"><div class="bar" id="envelopeBar"></div></div><p id="envelopeText"></p><div id="envelopes"></div><div class="row"><span>本月緩衝剩餘<br><small>只在信封不足時使用</small></span><span class="big" id="bufferLeft"></span></div><label>本月已使用緩衝</label><input id="bufferUsed" type="number"></section>
-<section id="weekdayYoga" style="display:none"><h2>平日瑜伽伸展</h2><p>平日只要做一點點伸展就好。</p><div id="yogaChecks"></div><div class="note">可以搭配 Rumbo App。完成 5～10 分鐘也算完成。</div></section>
-<section id="weekendExercise" style="display:none"><h2>週末運動提醒</h2><p>週末不用高強度，散步、超慢跑、親子活動都可以。</p><div id="weekendExerciseChecks"></div></section>
-<section id="weekendChores" style="display:none"><h2>週末家事提醒</h2><p>先做必要的，不需要把家裡整理到完美。</p><div id="chores"></div></section>
-</div>
+<section>
+<h2>今天最重要的一件事</h2>
+<input placeholder='今天只留一件事就好'>
+</section>
 
-<div id="longPage" class="page">
-<section><h2>每月固定金流</h2><label>每月收入</label><input id="income" type="number"><div class="row"><span>固定配置後剩餘</span><span class="big" id="monthLeft"></span></div><div class="barbox"><div class="bar" id="monthBar"></div></div><p id="monthText"></p><div id="monthlyItems"></div></section>
-<section><h2>三萬進度</h2><p>月光沉澱袋：每週 NT$400 × 5 週 = NT$2,000／月。</p><label>三萬袋目前累積</label><input id="thirtyK" type="number"><div class="row"><span>距離 NT$30,000 還差</span><span class="big" id="thirtyLeft"></span></div><div class="barbox"><div class="bar" id="thirtyBar"></div></div><p id="thirtyText"></p></section>
-<section><h2>生理期紀錄</h2><label>開始日期</label><input id="periodDate" type="date"><label>經血量</label><select id="flow"><option>少量</option><option>普通</option><option>偏多</option><option>很多</option></select><label>疼痛感</label><select id="pain"><option>無</option><option>輕微</option><option>明顯</option><option>需要休息</option></select></section>
-<section><h2>不急，但可能會愛</h2><p>先放進來，72 小時後再決定。</p><input id="wishInput" placeholder="想買的東西…"><button id="addWish" class="chip">加入觀望清單</button><div id="wishList"></div></section>
-</div>
+<section>
+<h2>最基本照顧</h2>
+<div id='care'></div>
+</section>
 
-<div id="notePage" class="page">
-<section><h2>每日手帳</h2><p>每天都是新的一頁。昨天沒寫，也不會累積失敗。</p><label>今日一句</label><input id="journalLine" placeholder="今天最想記住的是？"><label>今天的小事</label><textarea id="smallThings" placeholder="例如：禕禕笑了、下班有風、完成一份公文。"></textarea><label>感謝紀錄</label><textarea id="gratitude" placeholder="不用正能量，謝謝今天有撐過去也可以。"></textarea><label>自由書寫</label><textarea id="journal" placeholder="今天發生了什麼？身體有沒有累？"></textarea><button class="row btn" onclick="toggleSimple('dayClosed')"><span>今天到這裡就好</span><span id="dayClosedCheck">○</span></button></section>
-</div>
-</main>
+<section>
+<h2>今天有寫紙本手帳嗎？</h2>
+<div class='row'><span>紙本手帳</span><span id='journal'>○</span></div>
+<small id='journalPrompt'></small>
+</section>
+
+<section>
+<h2>本週生活袋</h2>
+<div id='bags'></div>
+</section>
+
+<section id='weekday'>
+<h2>平日瑜伽伸展</h2>
+<div id='yoga'></div>
+</section>
+
+<section id='weekend' style='display:none'>
+<h2>週末家事</h2>
+<div id='chores'></div>
+<h2>週末運動</h2>
+<div id='exercise'></div>
+</section>
 
 <script>
-const key="jingsAppV1";const todayKey=new Date().toISOString().slice(0,10);
-const prompts=["今天不用追回昨天。","今天也是新的開始。","慢慢來也算前進。","先照顧自己，再處理世界。","今天活著就很好。"];
-const defaults={lastDate:todayKey,recovery:false,freeze:"我今天還可以",energy:"穩定",oneThing:"",oneThingDone:false,morning:false,afternoon:false,dayClosed:false,basicCare:[["吃藥",false],["喝水",false],["洗澡",false],["睡覺",false]],periodDate:"",flow:"普通",pain:"輕微",journalLine:"",smallThings:"",gratitude:"",journal:"",income:56138,flexMonth:11000,bufferMonth:1000,bufferUsed:0,thirtyK:0,wishes:[],monthly:[["給娘家","固定支持",5000],["給妹妹","預設 3,000–5,000 中間值",4000],["與先生共同基金","家庭共同配置",10000],["禕禕教育基金","長期儲蓄",10000],["黃金存摺","固定投入",3000],["股票投資","固定投入",3000],["世界展望會","固定捐款",3700],["五週制可動用預算","生活信封 10,000＋本月緩衝 1,000",11000]],envelopes:[["日常餐桌","早餐店、偶爾外食、便利商店、加菜",700,0],["靜謐自己","面膜、精油、小保養補貨、小型美容支出",300,0],["個人風格","耳環、絲襪、小飾品、二手小物",400,0],["微光幸福","咖啡、小零食、突然想吃的",200,0],["月光沉澱","不動、月底累積、進三萬袋",400,0]],chores:[["洗衣服 / 曬衣服","先處理最急的衣物",false],["掃地或吸地","只做主要活動區域也可以",false],["浴室簡單刷洗","洗手台、馬桶、地板擇一也算完成",false],["補衛生紙與日用品","確認家裡這週會用到的東西",false],["整理包包與制服 / 上班用品","讓下週一比較不慌",false],["月白靜物小整理","照片、包材、作品區，十分鐘即可",false]],yoga:[["肩頸伸展","辦公久坐後，放鬆肩頸與上背",false],["髖部伸展","讓下半身不要一直緊繃",false],["睡前溫和伸展","5～10 分鐘即可",false]],weekendExercise:[["超慢跑或散步","10～20 分鐘也算完成",false],["瑜伽伸展加長版","身體狀態可以時再做",false],["親子活動走動","陪禕禕去公園、散步，也算身體有動",false]]};
-let saved=JSON.parse(localStorage.getItem(key)||"{}");let data=Object.assign({},defaults,saved);["monthly","envelopes","chores","yoga","weekendExercise","basicCare","wishes"].forEach(k=>{if(!saved[k])data[k]=defaults[k]});
-function save(){localStorage.setItem(key,JSON.stringify(data))}
-function dailyReset(){if(data.lastDate!==todayKey){data.lastDate=todayKey;data.recovery=false;data.freeze="我今天還可以";data.energy="穩定";data.oneThing="";data.oneThingDone=false;data.morning=false;data.afternoon=false;data.dayClosed=false;data.basicCare=data.basicCare.map(x=>[x[0],false]);data.yoga=data.yoga.map(x=>[x[0],x[1],false]);data.weekendExercise=data.weekendExercise.map(x=>[x[0],x[1],false]);data.chores=data.chores.map(x=>[x[0],x[1],false]);data.journalLine="";data.smallThings="";data.gratitude="";data.journal="";save()}}
-function money(n){return"NT$ "+Number(n||0).toLocaleString("zh-TW")}
-function showPage(id,btn){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));btn.classList.add("active")}
-function toggleSimple(prop){data[prop]=!data[prop];save();renderAll()}
-function bind(id,prop){const el=document.getElementById(id);if(!el)return;el.value=data[prop]??"";el.oninput=()=>{data[prop]=el.type==="number"?Number(el.value||0):el.value;save();renderAll()}}
-function chips(id,arr,prop){const box=document.getElementById(id);if(!box)return;box.innerHTML="";arr.forEach(x=>{const b=document.createElement("button");b.className="chip "+(data[prop]===x?"selected":"");b.textContent=x;b.onclick=()=>{data[prop]=x;save();renderAll()};box.appendChild(b)})}
-function renderCheckList(id,name){const box=document.getElementById(id);if(!box)return;box.innerHTML="";data[name].forEach((item,i)=>{const done=item[item.length-1];const b=document.createElement("button");b.className="row btn";b.innerHTML=`<span class="${done?'done':''}"><b>${item[0]}</b><br><small>${item[1]||""}</small></span><span class="check">${done?'✓':'○'}</span>`;b.onclick=()=>{data[name][i][item.length-1]=!done;save();renderAll()};box.appendChild(b)})}
-function renderMoney(){const fixed=data.monthly.reduce((s,x)=>s+Number(x[2]||0),0),income=Number(data.income||0),left=income-fixed,pct=income?Math.min(100,Math.round(fixed/income*100)):0;monthLeft.textContent=money(left);monthLeft.className="big "+(left>=0?"ok":"warn");monthBar.style.width=pct+"%";monthText.textContent=`固定配置 ${money(fixed)}，占收入 ${pct}%`;monthlyItems.innerHTML="";data.monthly.forEach((m,i)=>{const div=document.createElement("div");div.className="row";div.innerHTML=`<span><b>${m[0]}</b><br><small>${m[1]}</small></span><input class="money-input" type="number" value="${m[2]}">`;div.querySelector("input").oninput=e=>{data.monthly[i][2]=Number(e.target.value||0);save();renderMoney()};monthlyItems.appendChild(div)});const budget=data.envelopes.reduce((s,x)=>s+Number(x[2]||0),0),used=data.envelopes.reduce((s,x)=>s+Number(x[3]||0),0),remain=budget-used,pct2=budget?Math.min(100,Math.round(used/budget*100)):0;envelopeLeft.textContent=money(remain);envelopeLeft.className="big "+(remain>=0?"ok":"warn");envelopeBar.style.width=pct2+"%";envelopeText.textContent=`本週已使用 ${money(used)}／${money(budget)}，使用 ${pct2}%`;envelopes.innerHTML="";data.envelopes.forEach((e,i)=>{const div=document.createElement("div");div.className="row";const remainOne=Number(e[2])-Number(e[3]);div.innerHTML=`<span><b>${e[0]}：${money(e[2])}</b><br><small>${e[1]}</small><br><span class="tag">剩餘 ${money(remainOne)}</span></span><input class="money-input" type="number" value="${e[3]}">`;div.querySelector("input").oninput=ev=>{data.envelopes[i][3]=Number(ev.target.value||0);save();renderMoney()};envelopes.appendChild(div)});const br=Number(data.bufferMonth||0)-Number(data.bufferUsed||0);bufferLeft.textContent=money(br);bufferLeft.className="big "+(br>=0?"ok":"warn");const thirty=Number(data.thirtyK||0),tr=30000-thirty,tp=Math.min(100,Math.round(thirty/30000*100));thirtyLeft.textContent=money(tr);thirtyBar.style.width=tp+"%";thirtyText.textContent=`已累積 ${money(thirty)}，完成 ${tp}%。以每月 NT$2,000 沉澱，約 ${Math.max(0,Math.ceil(tr/2000))} 個月可達成。`}
-function renderSchedule(){const isWeekend=[0,6].includes(new Date().getDay());weekdayYoga.style.display=isWeekend?"none":"block";weekendExercise.style.display=isWeekend?"block":"none";weekendChores.style.display=isWeekend?"block":"none";if(!isWeekend)renderCheckList("yogaChecks","yoga");if(isWeekend){renderCheckList("weekendExerciseChecks","weekendExercise");renderCheckList("chores","chores")}}
-function renderWishes(){wishList.innerHTML="";data.wishes.forEach((w,i)=>{const row=document.createElement("div");row.className="row";row.innerHTML=`<span><b>${w.text}</b><br><small>加入日期：${w.date}</small></span><button class="chip">刪除</button>`;row.querySelector("button").onclick=()=>{data.wishes.splice(i,1);save();renderWishes()};wishList.appendChild(row)});addWish.onclick=()=>{const v=wishInput.value.trim();if(!v)return;data.wishes.unshift({text:v,date:new Intl.DateTimeFormat("zh-TW").format(new Date())});wishInput.value="";save();renderWishes()}}
-function renderRecovery(){recoveryToggle.textContent=data.recovery?"開啟中":"關閉";recoveryToggle.className="chip "+(data.recovery?"selected":"");recoveryToggle.onclick=()=>{data.recovery=!data.recovery;save();renderAll()};document.querySelectorAll("section").forEach(sec=>{const title=sec.querySelector("h2")?.textContent||"";sec.classList.toggle("soft-hide",data.recovery&&!["恢復模式","最基本照顧","每日手帳"].includes(title))})}
-function renderAll(){today.textContent=new Intl.DateTimeFormat("zh-TW",{month:"long",day:"numeric",weekday:"long"}).format(new Date());dailyPrompt.textContent=prompts[new Date().getDate()%prompts.length];chips("freezeStates",["我今天還可以","我在撐","我想哭","我凍住了"],"freeze");freezeText.textContent="現在的自己："+data.freeze;chips("energyStates",["穩定","緊繃","很累","快撐不住"],"energy");energyText.textContent="今天工作耗能："+data.energy;energyNote.textContent=data.energy==="快撐不住"?"這週請減少額外安排，先讓自己恢復。":data.energy==="很累"?"今晚盡量不要再安排額外消耗。":"";renderCheckList("basicCare","basicCare");morningCheck.textContent=data.morning?"✓":"○";afternoonCheck.textContent=data.afternoon?"✓":"○";oneThingDoneCheck.textContent=data.oneThingDone?"✓":"○";dayClosedCheck.textContent=data.dayClosed?"✓":"○";renderMoney();renderSchedule();renderWishes();renderRecovery()}
-["oneThing","periodDate","flow","pain","journalLine","smallThings","gratitude","journal","income","flexMonth","bufferMonth","bufferUsed","thirtyK"].forEach(id=>bind(id,id));dailyReset();renderAll();
+const prompts=['今天不用追回昨天。','慢慢來也算前進。','今天活著就很好。'];
+const jp=['今天最想放下什麼？','今天有哪一刻比較輕鬆？','今天有沒有好好吃飯？'];
+
+quote.innerText=prompts[new Date().getDate()%prompts.length];
+journalPrompt.innerText=jp[new Date().getDate()%jp.length];
+
+const moods=['我今天還可以','我在撐','我想哭','我凍住了'];
+moods.forEach(m=>{
+const b=document.createElement('button');
+b.className='chip';
+b.innerText=m;
+b.onclick=()=>{document.querySelectorAll('#moods .chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');}
+moods.appendChild?0:0;
+document.getElementById('moods').appendChild(b);
+});
+
+['吃藥','喝水','洗澡','睡覺'].forEach(t=>{
+const r=document.createElement('div');
+r.className='row';
+r.innerHTML='<span>'+t+'</span><span>○</span>';
+r.onclick=()=>{r.querySelector('span:last-child').innerText=r.querySelector('span:last-child').innerText==='○'?'✓':'○'}
+care.appendChild(r);
+});
+
+[['日常餐桌',700],['靜謐自己',300],['個人風格',400],['微光幸福',200],['月光沉澱',400]].forEach(t=>{
+const r=document.createElement('div');
+r.className='row';
+r.innerHTML='<span>'+t[0]+'</span><small>NT$ '+t[1]+'</small>';
+bags.appendChild(r);
+});
+
+['星期一｜肩頸伸展','星期二｜髖部伸展','星期三｜恢復日','星期四｜睡前伸展','星期五｜放鬆版'].forEach(t=>{
+const r=document.createElement('div');
+r.className='row';
+r.innerHTML='<span>'+t+'</span><span>○</span>';
+yoga.appendChild(r);
+});
+
+['洗衣服','補日用品','整理制服與包包'].forEach(t=>{
+const r=document.createElement('div');
+r.className='row';
+r.innerHTML='<span>'+t+'</span><span>○</span>';
+chores.appendChild(r);
+});
+
+['超慢跑或散步','親子散步','瑜伽延長版'].forEach(t=>{
+const r=document.createElement('div');
+r.className='row';
+r.innerHTML='<span>'+t+'</span><span>○</span>';
+exercise.appendChild(r);
+});
+
+const w=[0,6].includes(new Date().getDay());
+weekend.style.display=w?'block':'none';
+weekday.style.display=w?'none':'block';
 </script>
 </body></html>

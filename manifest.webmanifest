@@ -1,10 +1,10 @@
 {
   "name": "Jing’s",
   "short_name": "Jing’s",
-  "start_url": ".",
   "display": "standalone",
-  "background_color": "#F8F5EF",
-  "theme_color": "#F8F5EF",
+  "background_color": "#F7F3EC",
+  "theme_color": "#F7F3EC",
+  "start_url": ".",
   "icons": [
     {
       "src": "jing-icon-180.png",
