@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Jing’s v4.0</title>
+  <title>Jing’s v4.1</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="jing-icon-180.png" />
   <meta name="theme-color" content="#f7f3ee" media="(prefers-color-scheme: light)">
@@ -28,7 +28,7 @@
 <body>
   <main class="wrap">
     <header>
-      <div class="kicker">Jing’s v4.0</div>
+      <div class="kicker">Jing’s v4.1</div>
       <div class="title">今天也是新的開始</div>
       <div class="date" id="todayText"></div>
     </header>
@@ -83,7 +83,7 @@
     <section class="card">
       <h2>生活基金袋</h2>
       <div id="funds"></div>
-      <div class="pill">每月 1 日自動重置，舊月份保留在本機紀錄。</div>
+      <div class="pill">每週一自動重新計算，舊週次保留在本機紀錄。</div>
     </section>
 
     <section class="card">
@@ -98,9 +98,15 @@ const fundDefaults=[['日常餐桌袋',800],['靜謐自己',400],['風格飾品'
 const dailyKeys=['work','life','spirit','sleep','mood','energy','med','water','sun','journal','yoga','docTodo','docDoing','docDone','tomato','chore1','chore2','chore3','slowJog','walk','weekendYoga'];
 const pad=n=>String(n).padStart(2,'0');
 function dateKey(d=new Date()){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
-function monthKey(d=new Date()){return `${d.getFullYear()}-${pad(d.getMonth()+1)}`}
+function weekKey(d=new Date()){
+  const date=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  const day=date.getDay();
+  const diff=day===0?-6:1-day; // 週一作為每週開始
+  date.setDate(date.getDate()+diff);
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+}
 function zhDate(d=new Date()){return d.toLocaleDateString('zh-Hant-TW',{year:'numeric',month:'2-digit',day:'2-digit',weekday:'long'})}
-let today=dateKey(), month=monthKey();
+let today=dateKey(), week=weekKey();
 document.getElementById('todayText').textContent=zhDate();
 function loadJSON(k,fallback){try{return JSON.parse(localStorage.getItem(k))??fallback}catch{return fallback}}
 function saveJSON(k,v){localStorage.setItem(k,JSON.stringify(v))}
@@ -111,10 +117,10 @@ function loadDaily(){const data=currentDaily(); dailyKeys.forEach(id=>{const el=
 function bindDaily(){dailyKeys.forEach(id=>{const el=document.getElementById(id); if(!el)return; el.addEventListener('input',()=>{const data=currentDaily(); data[id]=el.type==='checkbox'?el.checked:el.value; saveDaily(data);}); el.addEventListener('change',()=>{const data=currentDaily(); data[id]=el.type==='checkbox'?el.checked:el.value; saveDaily(data);});});}
 function setupMode(){const weekend=[0,6].includes(new Date().getDay()); document.getElementById('weekdayCard').style.display=weekend?'none':'block'; document.getElementById('weekendCard').style.display=weekend?'block':'none';}
 function fundStore(){return loadJSON('jings_funds',{})}
-function ensureMonthFunds(){const all=fundStore(); if(!all[month]){all[month]=fundDefaults.map(([name,limit])=>({name,limit,spent:0,items:[]})); saveJSON('jings_funds',all)} return all[month]}
-function saveMonthFunds(funds){const all=fundStore(); all[month]=funds; saveJSON('jings_funds',all)}
-function renderFunds(){const funds=ensureMonthFunds(); const root=document.getElementById('funds'); root.innerHTML=''; funds.forEach((f,i)=>{const remain=f.limit-f.spent; const div=document.createElement('div'); div.className='fund'; div.innerHTML=`<div class="fundHead"><div class="fundName">${f.name}</div><div class="remain">剩 NT$${remain}</div></div><div class="meta">本月 NT$${f.limit}｜已花費 NT$${f.spent}</div><div class="spend"><input type="number" min="0" inputmode="numeric" placeholder="輸入花費金額" id="fundInput${i}"><button class="btn" onclick="addFund(${i})">加入</button></div>`; root.appendChild(div);});}
-function addFund(i){const input=document.getElementById('fundInput'+i); const amount=parseInt(input.value,10); if(!amount||amount<1)return; const funds=ensureMonthFunds(); funds[i].spent+=amount; funds[i].items.push({amount,date:today}); saveMonthFunds(funds); renderFunds();}
+function ensureWeekFunds(){const all=fundStore(); if(!all[week]){all[week]=fundDefaults.map(([name,limit])=>({name,limit,spent:0,items:[]})); saveJSON('jings_funds',all)} return all[week]}
+function saveWeekFunds(funds){const all=fundStore(); all[week]=funds; saveJSON('jings_funds',all)}
+function renderFunds(){const funds=ensureWeekFunds(); const root=document.getElementById('funds'); root.innerHTML=''; funds.forEach((f,i)=>{const remain=f.limit-f.spent; const div=document.createElement('div'); div.className='fund'; div.innerHTML=`<div class="fundHead"><div class="fundName">${f.name}</div><div class="remain">剩 NT$${remain}</div></div><div class="meta">本週 NT$${f.limit}｜已花費 NT$${f.spent}</div><div class="spend"><input type="number" min="0" inputmode="numeric" placeholder="輸入花費金額" id="fundInput${i}"><button class="btn" onclick="addFund(${i})">加入</button></div>`; root.appendChild(div);});}
+function addFund(i){const input=document.getElementById('fundInput'+i); const amount=parseInt(input.value,10); if(!amount||amount<1)return; const funds=ensureWeekFunds(); funds[i].spent+=amount; funds[i].items.push({amount,date:today}); saveWeekFunds(funds); renderFunds();}
 function toggleHistory(){const el=document.getElementById('history'); el.classList.toggle('open'); const all=dailyStore(); const keys=Object.keys(all).sort().reverse().slice(0,7); el.innerHTML=keys.length?keys.map(k=>`<p><b>${k}</b><br>工作：${all[k].work||''}<br>生活：${all[k].life||''}<br>靈性：${all[k].spirit||''}</p>`).join(''):'尚無歷史紀錄。';}
 setupMode(); loadDaily(); bindDaily(); renderFunds();
 if('serviceWorker' in navigator){/* no service worker required for this simple PWA */}
