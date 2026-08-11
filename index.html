@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Jing’s v4.3</title>
+  <title>Jing’s v4.4</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="jing-icon-180.png" />
   <meta name="theme-color" content="#f7f3ee" media="(prefers-color-scheme: light)">
@@ -22,16 +22,28 @@
     header{padding:8px 2px 18px}.kicker{font-size:13px;color:var(--muted);letter-spacing:.04em}.title{font-size:30px;font-weight:750;margin:6px 0 4px}.date{font-size:15px;color:var(--muted)}
     .card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;margin:14px 0;box-shadow:0 10px 28px #00000010;backdrop-filter: blur(14px);}
     h2{font-size:18px;margin:0 0 14px}.row{display:flex;gap:10px;align-items:center;margin:9px 0}.row label{min-width:58px;color:var(--muted);font-size:14px}.field,select,input[type=number],input[type=text]{width:100%;border:1px solid var(--line);border-radius:14px;background:var(--input);color:var(--text);padding:12px;font-size:16px;outline:none}select{appearance:none}.checks{display:grid;gap:10px}.check{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--input)}input[type=checkbox]{width:21px;height:21px;accent-color:var(--accent)}
-    .triple{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.num{text-align:center}.fund{padding:14px 0;border-top:1px solid var(--line)}.fund:first-child{border-top:0;padding-top:0}.fundHead{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.fundName{font-weight:700}.remain{font-weight:750}.meta{font-size:13px;color:var(--muted);margin-top:5px}.spend{display:flex;gap:8px;margin-top:10px}.spend input{flex:1}.btn{border:0;border-radius:14px;background:var(--accent);color:var(--bg);padding:0 14px;font-size:15px;font-weight:700}.subbtn{border:1px solid var(--line);border-radius:14px;background:var(--soft);color:var(--text);padding:10px 12px;font-size:14px}.small{font-size:13px;color:var(--muted);line-height:1.5}.history{display:none}.history.open{display:block}.pill{display:inline-block;background:var(--soft);border-radius:999px;padding:6px 10px;font-size:13px;color:var(--muted);margin-top:8px}.periodDetails{display:none;margin-top:12px}.periodDetails.open{display:block}.symptoms{display:grid;grid-template-columns:1fr 1fr;gap:8px}.periodDay{font-size:14px;font-weight:700;color:var(--accent);margin-top:10px}
+    .triple{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.num{text-align:center}.fund{padding:14px 0;border-top:1px solid var(--line)}.fund:first-child{border-top:0;padding-top:0}.fundHead{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.fundName{font-weight:700}.remain{font-weight:750}.meta{font-size:13px;color:var(--muted);margin-top:5px}.spend{display:flex;gap:8px;margin-top:10px}.spend input{flex:1}.btn{border:0;border-radius:14px;background:var(--accent);color:var(--bg);padding:0 14px;font-size:15px;font-weight:700}.subbtn{border:1px solid var(--line);border-radius:14px;background:var(--soft);color:var(--text);padding:10px 12px;font-size:14px}.small{font-size:13px;color:var(--muted);line-height:1.5}.history{display:none}.history.open{display:block}.pill{display:inline-block;background:var(--soft);border-radius:999px;padding:6px 10px;font-size:13px;color:var(--muted);margin-top:8px}.periodDetails{display:none;margin-top:12px}.periodDetails.open{display:block}.symptoms{display:grid;grid-template-columns:1fr 1fr;gap:8px}.periodDay{font-size:14px;font-weight:700;color:var(--accent);margin-top:10px}.countdownList{display:grid;gap:10px;margin-top:12px}.countdownItem{padding:13px;border:1px solid var(--line);border-radius:16px;background:var(--input)}.countdownHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.countdownTitle{font-weight:750}.countdownValue{font-size:15px;font-weight:750;color:var(--accent);margin-top:5px}.countdownDate{font-size:12px;color:var(--muted);margin-top:4px}.dangerBtn{border:0;background:transparent;color:var(--muted);font-size:18px;padding:0 4px}.countdownForm{display:grid;grid-template-columns:1fr 1fr;gap:8px}.countdownForm .full{grid-column:1/-1}.emptyState{font-size:13px;color:var(--muted);padding:8px 2px 2px}
   </style>
 </head>
 <body>
   <main class="wrap">
     <header>
-      <div class="kicker">Jing’s v4.3</div>
+      <div class="kicker">Jing’s v4.4</div>
       <div class="title">今天也是新的開始</div>
       <div class="date" id="todayText"></div>
     </header>
+
+    <section class="card">
+      <h2>倒數提醒</h2>
+      <div class="countdownForm">
+        <input id="countdownTitle" class="field full" placeholder="例如：演習、回診、旅行、繳費日">
+        <input id="countdownDate" class="field" type="date">
+        <input id="countdownTime" class="field" type="time">
+        <button class="btn full" style="padding:12px 14px" onclick="addCountdown()">新增倒數</button>
+      </div>
+      <div id="countdownList" class="countdownList"></div>
+      <div class="pill">無填時間時，以日期為倒數；最近的提醒會排在最前面。</div>
+    </section>
 
     <section class="card">
       <h2>今日三件事</h2>
@@ -150,7 +162,65 @@ function saveWeekFunds(funds){const all=fundStore(); all[week]=funds; saveJSON('
 function renderFunds(){const funds=ensureWeekFunds(); const root=document.getElementById('funds'); root.innerHTML=''; funds.forEach((f,i)=>{const remain=f.limit-f.spent; const div=document.createElement('div'); div.className='fund'; div.innerHTML=`<div class="fundHead"><div class="fundName">${f.name}</div><div class="remain">剩 NT$${remain}</div></div><div class="meta">本週 NT$${f.limit}｜已花費 NT$${f.spent}</div><div class="spend"><input type="number" min="0" inputmode="numeric" placeholder="輸入花費金額" id="fundInput${i}"><button class="btn" onclick="addFund(${i})">加入</button></div>`; root.appendChild(div);});}
 function addFund(i){const input=document.getElementById('fundInput'+i); const amount=parseInt(input.value,10); if(!amount||amount<1)return; const funds=ensureWeekFunds(); funds[i].spent+=amount; funds[i].items.push({amount,date:today}); saveWeekFunds(funds); renderFunds();}
 function toggleHistory(){const el=document.getElementById('history'); el.classList.toggle('open'); const all=dailyStore(); const keys=Object.keys(all).sort().reverse().slice(0,7); const dailyHtml=keys.length?keys.map(k=>`<p><b>${k}</b>${all[k].periodToday?'｜生理期':''}${all[k].contraceptivePill?'｜已服避孕藥':''}<br>工作：${all[k].work||''}<br>生活：${all[k].life||''}<br>靈性：${all[k].spirit||''}</p>`).join(''):'尚無每日紀錄。'; const periods=periodSummaries().slice(0,6); const periodHtml=periods.length?`<hr style="border:0;border-top:1px solid var(--line);margin:16px 0"><b>最近生理期</b>${periods.map(p=>`<p>${p.start}${p.end!==p.start?' ～ '+p.end:''}｜${p.days} 天</p>`).join('')}`:''; el.innerHTML=dailyHtml+periodHtml;}
-setupMode(); loadDaily(); bindDaily(); renderPeriod(); renderFunds();
+function countdownStore(){return loadJSON('jings_countdowns',[])}
+function saveCountdowns(items){saveJSON('jings_countdowns',items)}
+function addCountdown(){
+  const title=document.getElementById('countdownTitle').value.trim();
+  const date=document.getElementById('countdownDate').value;
+  const time=document.getElementById('countdownTime').value;
+  if(!title||!date)return;
+  const items=countdownStore();
+  items.push({id:Date.now(),title,date,time,createdAt:new Date().toISOString()});
+  saveCountdowns(items);
+  document.getElementById('countdownTitle').value='';
+  document.getElementById('countdownDate').value='';
+  document.getElementById('countdownTime').value='';
+  renderCountdowns();
+}
+function deleteCountdown(id){saveCountdowns(countdownStore().filter(x=>x.id!==id));renderCountdowns()}
+function countdownText(item){
+  const now=new Date();
+  if(!item.time){
+    const [y,m,d]=item.date.split('-').map(Number);
+    const target=new Date(y,m-1,d);
+    const todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    const diff=Math.round((target-todayStart)/86400000);
+    if(diff>1)return `還有 ${diff} 天`;
+    if(diff===1)return '明天';
+    if(diff===0)return '就是今天';
+    if(diff===-1)return '已過 1 天';
+    return `已過 ${Math.abs(diff)} 天`;
+  }
+  const target=new Date(`${item.date}T${item.time}`);
+  const diff=target-now;
+  if(diff<=0){
+    const mins=Math.floor(Math.abs(diff)/60000);
+    if(mins<60)return `已到期 ${mins} 分鐘`;
+    const hrs=Math.floor(mins/60);
+    if(hrs<24)return `已到期 ${hrs} 小時`;
+    return `已到期 ${Math.floor(hrs/24)} 天`;
+  }
+  const mins=Math.floor(diff/60000);
+  const days=Math.floor(mins/1440);
+  const hrs=Math.floor((mins%1440)/60);
+  const remMins=mins%60;
+  if(days>0)return `還有 ${days} 天 ${hrs} 小時`;
+  if(hrs>0)return `還有 ${hrs} 小時 ${remMins} 分`;
+  return `還有 ${Math.max(1,remMins)} 分鐘`;
+}
+function renderCountdowns(){
+  const root=document.getElementById('countdownList');
+  let items=countdownStore();
+  items.sort((a,b)=>{
+    const at=new Date(`${a.date}T${a.time||'00:00'}`).getTime();
+    const bt=new Date(`${b.date}T${b.time||'00:00'}`).getTime();
+    return at-bt;
+  });
+  if(!items.length){root.innerHTML='<div class="emptyState">目前沒有倒數。想記再新增就好。</div>';return}
+  root.innerHTML=items.map(item=>`<div class="countdownItem"><div class="countdownHead"><div><div class="countdownTitle">${escapeHtml(item.title)}</div><div class="countdownValue">${countdownText(item)}</div><div class="countdownDate">${item.date}${item.time?' '+item.time:''}</div></div><button class="dangerBtn" aria-label="刪除" onclick="deleteCountdown(${item.id})">×</button></div></div>`).join('');
+}
+function escapeHtml(str){return String(str).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+setupMode(); loadDaily(); bindDaily(); renderPeriod(); renderFunds(); renderCountdowns(); setInterval(renderCountdowns,60000);
 if('serviceWorker' in navigator){/* no service worker required for this simple PWA */}
 </script>
 </body>
