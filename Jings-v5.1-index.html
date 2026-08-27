@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Jing’s v5.1</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="jing-icon-180.png" />
+  <meta name="theme-color" content="#f7f3ee" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1d1b1a" media="(prefers-color-scheme: dark)">
+  <style>
+    :root{
+      --bg:#f7f3ee; --card:#ffffffcc; --text:#2e2926; --muted:#837973;
+      --line:#e7dfd7; --accent:#9b8576; --soft:#efe7df; --input:#fbf8f5;
+      color-scheme: light dark;
+    }
+    @media (prefers-color-scheme: dark){
+      :root{--bg:#1d1b1a;--card:#2a2725cc;--text:#f3eee8;--muted:#b7aaa0;--line:#3a3531;--accent:#d5c1b0;--soft:#342f2b;--input:#24211f;}
+    }
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Noto Sans TC",sans-serif;}
+    .wrap{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 18px 36px;}
+    header{padding:8px 2px 18px}.kicker{font-size:13px;color:var(--muted);letter-spacing:.04em}.title{font-size:30px;font-weight:750;margin:6px 0 4px}.date{font-size:15px;color:var(--muted)}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;margin:14px 0;box-shadow:0 10px 28px #00000010;backdrop-filter: blur(14px);}
+    h2{font-size:18px;margin:0 0 14px}.row{display:flex;gap:10px;align-items:center;margin:9px 0}.row label{min-width:58px;color:var(--muted);font-size:14px}.field,select,input[type=number],input[type=text]{width:100%;border:1px solid var(--line);border-radius:14px;background:var(--input);color:var(--text);padding:12px;font-size:16px;outline:none}select{appearance:none}.checks{display:grid;gap:10px}.check{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--input)}input[type=checkbox]{width:21px;height:21px;accent-color:var(--accent)}
+    .triple{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.num{text-align:center}.fund{padding:14px 0;border-top:1px solid var(--line)}.fund:first-child{border-top:0;padding-top:0}.fundHead{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.fundName{font-weight:700}.remain{font-weight:750}.meta{font-size:13px;color:var(--muted);margin-top:5px}.spend{display:flex;gap:8px;margin-top:10px}.spend input{flex:1}.btn{border:0;border-radius:14px;background:var(--accent);color:var(--bg);padding:0 14px;font-size:15px;font-weight:700}.subbtn{border:1px solid var(--line);border-radius:14px;background:var(--soft);color:var(--text);padding:10px 12px;font-size:14px}.small{font-size:13px;color:var(--muted);line-height:1.5}.history{display:none}.history.open{display:block}.pill{display:inline-block;background:var(--soft);border-radius:999px;padding:6px 10px;font-size:13px;color:var(--muted);margin-top:8px}.periodDetails{display:none;margin-top:12px}.periodDetails.open{display:block}.symptoms{display:grid;grid-template-columns:1fr 1fr;gap:8px}.periodDay{font-size:14px;font-weight:700;color:var(--accent);margin-top:10px}.countdownList{display:grid;gap:10px;margin-top:12px}.countdownItem{padding:13px;border:1px solid var(--line);border-radius:16px;background:var(--input)}.countdownHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.countdownTitle{font-weight:750}.countdownValue{font-size:15px;font-weight:750;color:var(--accent);margin-top:5px}.countdownDate{font-size:12px;color:var(--muted);margin-top:4px}.dangerBtn{border:0;background:transparent;color:var(--muted);font-size:18px;padding:0 4px}.countdownForm{display:grid;grid-template-columns:1fr 1fr;gap:8px}.countdownForm .full{grid-column:1/-1}.emptyState{font-size:13px;color:var(--muted);padding:8px 2px 2px}
+    .payGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+    .fundItems{margin-top:10px;display:grid;gap:7px}.fundItem{font-size:13px;color:var(--muted);padding:9px 10px;border-radius:12px;background:var(--soft);display:flex;justify-content:space-between;gap:8px}
+    .careMeta{font-size:14px;color:var(--muted);margin:8px 0 12px}.careActions{display:flex;gap:8px;flex-wrap:wrap}.careActions .subbtn{flex:1;min-width:120px}
+    .summaryBox{padding:12px;border-radius:16px;background:var(--soft);font-size:13px;color:var(--muted);margin-top:12px}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div class="kicker">Jing’s v5.1</div>
+      <div class="title">今天也是新的開始</div>
+      <div class="date" id="todayText"></div>
+    </header>
+
+    <section class="card">
+      <h2>倒數提醒</h2>
+      <div class="countdownForm">
+        <input id="countdownTitle" class="field full" placeholder="例如：演習、回診、旅行、繳費日">
+        <input id="countdownDate" class="field" type="date">
+        <input id="countdownTime" class="field" type="time">
+        <button class="btn full" style="padding:12px 14px" onclick="addCountdown()">新增倒數</button>
+      </div>
+      <div id="countdownList" class="countdownList"></div>
+      <div class="pill">無填時間時，以日期為倒數；最近的提醒會排在最前面。</div>
+    </section>
+
+    <section class="card">
+      <h2>今日三件事</h2>
+      <div class="row"><label>工作</label><input id="work" class="field" placeholder="今天最重要的一件事"></div>
+      <div class="row"><label>生活</label><input id="life" class="field" placeholder="今天最重要的一件事"></div>
+      <div class="row"><label>靈性</label><input id="spirit" class="field" placeholder="今天最重要的一件事"></div>
+    </section>
+
+    <section class="card">
+      <h2>今日狀態</h2>
+      <div class="row"><label>睡眠</label><select id="sleep"><option>不錯</option><option selected>普通</option><option>疲憊</option></select></div>
+      <div class="row"><label>心情</label><select id="mood"><option>平靜</option><option selected>普通</option><option>低落</option></select></div>
+      <div class="row"><label>體力</label><select id="energy"><option>有精神</option><option selected>普通</option><option>很累</option></select></div>
+    </section>
+
+    <section class="card">
+      <h2>今日照顧自己</h2>
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="med">服藥</label>
+        <label class="check"><input type="checkbox" id="water">喝水</label>
+        <label class="check"><input type="checkbox" id="sun">曬太陽</label>
+        <label class="check"><input type="checkbox" id="journal">寫紙本手帳</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>美容照護</h2>
+      <div id="hairWashMeta" class="careMeta"></div>
+      <div class="careActions">
+        <button class="subbtn" onclick="recordHairWash()">今天洗頭</button>
+        <button class="subbtn" onclick="snoozeHairWash()">明天再提醒</button>
+      </div>
+      <div class="row" style="margin-top:12px"><label>提醒</label>
+        <select id="hairWashInterval">
+          <option value="2">每 2 天</option><option value="3" selected>每 3 天</option>
+          <option value="4">每 4 天</option><option value="5">每 5 天</option><option value="7">每 7 天</option>
+        </select>
+      </div>
+      <div class="checks" style="margin-top:10px">
+        <label class="check"><input type="checkbox" id="hairCare">今天有護髮</label>
+        <label class="check"><input type="checkbox" id="faceMask">今天有敷面膜</label>
+        <label class="check"><input type="checkbox" id="bodyExfoliation">今天有身體去角質</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>生理期紀錄</h2>
+      <label class="check"><input type="checkbox" id="periodToday">今天有生理期</label>
+      <div id="periodDayText" class="periodDay"></div>
+      <div id="periodDetails" class="periodDetails">
+        <div class="row"><label>經血量</label><select id="periodFlow"><option value="">請選擇</option><option>少量</option><option>一般</option><option>較多</option></select></div>
+        <div class="row"><label>疼痛</label><select id="periodPain"><option value="">請選擇</option><option>無</option><option>輕微</option><option>明顯</option><option>嚴重</option></select></div>
+        <label class="check"><input type="checkbox" id="contraceptivePill">今天有服用避孕藥</label>
+        <div class="small" style="margin:12px 0 8px">今日症狀（可複選）</div>
+        <div class="symptoms">
+          <label class="check"><input type="checkbox" id="symAbdomen">腹痛</label>
+          <label class="check"><input type="checkbox" id="symBack">腰痠</label>
+          <label class="check"><input type="checkbox" id="symHeadache">頭痛</label>
+          <label class="check"><input type="checkbox" id="symBreast">胸部脹痛</label>
+          <label class="check"><input type="checkbox" id="symTired">疲倦</label>
+          <label class="check"><input type="checkbox" id="symDigestive">腸胃不適</label>
+          <label class="check"><input type="checkbox" id="symMood">情緒波動</label>
+        </div>
+        <div class="row" style="margin-top:12px"><label>備註</label><input id="periodNote" class="field" placeholder="可留白"></div>
+      </div>
+      <div class="pill">資料只保存在這台裝置的瀏覽器中。</div>
+    </section>
+
+    <section class="card" id="weekdayCard">
+      <h2>平日模式</h2>
+      <label class="check"><input type="checkbox" id="yoga">中午 Rumbo 瑜伽伸展</label>
+      <div class="triple" style="margin-top:12px">
+        <div><label class="small">待辦</label><input id="docTodo" class="num" type="number" min="0" value="0"></div>
+        <div><label class="small">處理中</label><input id="docDoing" class="num" type="number" min="0" value="0"></div>
+        <div><label class="small">已完成</label><input id="docDone" class="num" type="number" min="0" value="0"></div>
+      </div>
+      <div class="row" style="margin-top:12px"><label>番茄鐘</label><input id="tomato" type="number" min="0" max="20" value="0"></div>
+    </section>
+
+    <section class="card" id="weekendCard">
+      <h2>週末模式</h2>
+      <input id="chore1" class="field" placeholder="家事 1" style="margin-bottom:10px">
+      <input id="chore2" class="field" placeholder="家事 2" style="margin-bottom:10px">
+      <input id="chore3" class="field" placeholder="家事 3">
+      <div class="checks" style="margin-top:12px">
+        <label class="check"><input type="checkbox" id="slowJog">超慢跑</label>
+        <label class="check"><input type="checkbox" id="walk">散步</label>
+        <label class="check"><input type="checkbox" id="weekendYoga">瑜伽伸展</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>生活基金袋</h2>
+      <div id="funds"></div>
+      <div id="paymentSummary" class="summaryBox"></div><div class="pill">每週一自動重新計算；每筆可記現金、信用卡或電子支付，舊週次保留在本機紀錄。</div>
+    </section>
+
+    <section class="card">
+      <h2>歷史</h2>
+      <p class="small">過去每日紀錄收在這裡。平常不打擾，需要時再展開。</p>
+      <button class="subbtn" onclick="toggleHistory()">查看最近紀錄</button>
+      <div id="history" class="history small"></div>
+    </section>
+  </main>
+<script>
+const fundDefaults=[['日常餐桌袋',800],['靜謐自己',400],['風格飾品',500],['微小幸福',200],['沉澱袋',300]];
+const dailyKeys=['work','life','spirit','sleep','mood','energy','med','water','sun','journal','periodToday','periodFlow','periodPain','contraceptivePill','symAbdomen','symBack','symHeadache','symBreast','symTired','symDigestive','symMood','periodNote','yoga','docTodo','docDoing','docDone','tomato','chore1','chore2','chore3','slowJog','walk','weekendYoga','hairCare','faceMask','bodyExfoliation'];
+const pad=n=>String(n).padStart(2,'0');
+function dateKey(d=new Date()){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function weekKey(d=new Date()){
+  const date=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  const day=date.getDay();
+  const diff=day===0?-6:1-day; // 週一作為每週開始
+  date.setDate(date.getDate()+diff);
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+}
+function zhDate(d=new Date()){return d.toLocaleDateString('zh-Hant-TW',{year:'numeric',month:'2-digit',day:'2-digit',weekday:'long'})}
+let today=dateKey(), week=weekKey();
+document.getElementById('todayText').textContent=zhDate();
+function loadJSON(k,fallback){try{return JSON.parse(localStorage.getItem(k))??fallback}catch{return fallback}}
+function saveJSON(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function dailyStore(){return loadJSON('jings_daily_records',{})}
+function saveDaily(obj){const all=dailyStore(); all[today]=obj; saveJSON('jings_daily_records',all)}
+function currentDaily(){const all=dailyStore(); return all[today]||{}}
+function loadDaily(){const data=currentDaily(); dailyKeys.forEach(id=>{const el=document.getElementById(id); if(!el)return; if(el.type==='checkbox')el.checked=!!data[id]; else if(data[id]!==undefined)el.value=data[id];});}
+function bindDaily(){dailyKeys.forEach(id=>{const el=document.getElementById(id); if(!el)return; const save=()=>{const data=currentDaily(); data[id]=el.type==='checkbox'?el.checked:el.value; saveDaily(data); if(id==='periodToday')renderPeriod();}; el.addEventListener('input',save); el.addEventListener('change',save);});}
+
+function addDays(key,delta){const [y,m,d]=key.split('-').map(Number);const dt=new Date(y,m-1,d);dt.setDate(dt.getDate()+delta);return dateKey(dt)}
+function periodDayNumber(){const all=dailyStore(); if(!all[today]?.periodToday)return 0; let count=1,key=today; while(true){key=addDays(key,-1); if(all[key]?.periodToday)count++; else break;} return count;}
+function renderPeriod(){const checked=document.getElementById('periodToday').checked; document.getElementById('periodDetails').classList.toggle('open',checked); const day=periodDayNumber(); document.getElementById('periodDayText').textContent=checked?`本次生理期第 ${day} 天`:'';}
+function periodSummaries(){const all=dailyStore(); const keys=Object.keys(all).sort(); const periods=[]; let current=null; for(const k of keys){if(all[k]?.periodToday){if(!current||addDays(current.end,1)!==k){current={start:k,end:k,days:1};periods.push(current)}else{current.end=k;current.days++}}} return periods.reverse();}
+function setupMode(){const weekend=[0,6].includes(new Date().getDay()); document.getElementById('weekdayCard').style.display=weekend?'none':'block'; document.getElementById('weekendCard').style.display=weekend?'block':'none';}
+function fundStore(){return loadJSON('jings_funds',{})}
+function ensureWeekFunds(){const all=fundStore(); if(!all[week]){all[week]=fundDefaults.map(([name,limit])=>({name,limit,spent:0,items:[]})); saveJSON('jings_funds',all)} return all[week]}
+function saveWeekFunds(funds){const all=fundStore(); all[week]=funds; saveJSON('jings_funds',all)}
+function renderFunds(){
+  const funds=ensureWeekFunds(),root=document.getElementById('funds');root.innerHTML='';
+  const totals={'現金':0,'信用卡':0,'電子支付':0,'其他':0};
+  funds.forEach((f,i)=>{
+    if(!Array.isArray(f.items))f.items=[];
+    f.spent=f.items.reduce((s,x)=>s+(Number(x.amount)||0),0);
+    f.items.forEach(x=>{const k=x.payment||'其他';totals[k]=(totals[k]||0)+(Number(x.amount)||0)});
+    const remain=f.limit-f.spent,div=document.createElement('div');div.className='fund';
+    const recent=f.items.slice(-3).reverse().map(x=>`<div class="fundItem"><span>${x.date}・${x.payment||'其他'}${x.source?'／'+x.source:''}${x.note?'・'+x.note:''}</span><b>NT$${x.amount}</b></div>`).join('');
+    div.innerHTML=`<div class="fundHead"><div class="fundName">${f.name}</div><div class="remain">剩 NT$${remain}</div></div><div class="meta">本週 NT$${f.limit}｜已花費 NT$${f.spent}</div><div class="spend"><input type="number" min="0" inputmode="numeric" placeholder="花費金額" id="fundInput${i}"></div><div class="payGrid"><select id="fundPay${i}" onchange="togglePaySource(${i})"><option>現金</option><option>信用卡</option><option>電子支付</option><option>其他</option></select><input type="text" id="fundSource${i}" placeholder="卡片／支付來源（選填）" style="display:none"></div><div class="spend"><input type="text" id="fundNote${i}" placeholder="備註（選填）"><button class="btn" onclick="addFund(${i})">加入</button></div><div class="fundItems">${recent}</div>`;
+    root.appendChild(div);
+  });
+  document.getElementById('paymentSummary').textContent=`本週付款方式｜現金 NT$${totals['現金']}・信用卡 NT$${totals['信用卡']}・電子支付 NT$${totals['電子支付']}・其他 NT$${totals['其他']}`;
+}
+function togglePaySource(i){const pay=document.getElementById('fundPay'+i).value,source=document.getElementById('fundSource'+i);source.style.display=(pay==='信用卡'||pay==='電子支付')?'block':'none';source.placeholder=pay==='信用卡'?'例如：聯邦卡':pay==='電子支付'?'例如：Apple Pay／LINE Pay／綁定卡片':'來源（選填）';}
+function addFund(i){const input=document.getElementById('fundInput'+i),amount=parseInt(input.value,10);if(!amount||amount<1)return;const funds=ensureWeekFunds();if(!Array.isArray(funds[i].items))funds[i].items=[];const payment=document.getElementById('fundPay'+i).value,source=document.getElementById('fundSource'+i).value.trim(),note=document.getElementById('fundNote'+i).value.trim();funds[i].items.push({amount,date:today,payment,source,note});funds[i].spent=funds[i].items.reduce((s,x)=>s+(Number(x.amount)||0),0);saveWeekFunds(funds);renderFunds();}
+
+function beautyStore(){return loadJSON('jings_beauty_care',{hairWashDates:[],interval:3,snoozeUntil:''})}
+function saveBeauty(v){saveJSON('jings_beauty_care',v)}
+function daysBetween(a,b){const A=a.split('-').map(Number),B=b.split('-').map(Number);return Math.round((new Date(B[0],B[1]-1,B[2])-new Date(A[0],A[1]-1,A[2]))/86400000)}
+function renderHairWash(){const s=beautyStore(),dates=(s.hairWashDates||[]).slice().sort(),last=dates.length?dates[dates.length-1]:null,interval=Number(s.interval||3);document.getElementById('hairWashInterval').value=String(interval);let text='尚未記錄洗頭日期。';if(last){const ago=daysBetween(last,today),due=ago>=interval&&(!s.snoozeUntil||today>=s.snoozeUntil);text=`上次洗頭：${last}・${ago===0?'今天':ago+' 天前'}${due?'｜今天可以洗頭了':''}`;}document.getElementById('hairWashMeta').textContent=text;}
+function recordHairWash(){const s=beautyStore();s.hairWashDates=s.hairWashDates||[];if(!s.hairWashDates.includes(today))s.hairWashDates.push(today);s.snoozeUntil='';saveBeauty(s);renderHairWash();}
+function snoozeHairWash(){const s=beautyStore();s.snoozeUntil=addDays(today,1);saveBeauty(s);renderHairWash();}
+document.getElementById('hairWashInterval').addEventListener('change',e=>{const s=beautyStore();s.interval=Number(e.target.value);saveBeauty(s);renderHairWash();});
+
+
+function exportJingsBackup(){
+  const data={app:"Jing's",version:"5.1",exportedAt:new Date().toISOString(),origin:location.origin,localStorage:{}};
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k && (k.startsWith('jings_') || k==='jingsDaily')) data.localStorage[k]=localStorage.getItem(k);
+  }
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`Jings-backup-${today}.json`;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  const s=document.getElementById('backupStatus'); if(s)s.textContent='備份已建立。請把檔案保留在 iPhone「檔案」App。';
+}
+function importJingsBackup(event){
+  const file=event.target.files&&event.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(reader.result);
+      if(!data || data.app!=="Jing's" || !data.localStorage || typeof data.localStorage!=='object') throw new Error('invalid');
+      const count=Object.keys(data.localStorage).length;
+      if(!confirm(`要匯入這份 Jing’s 備份嗎？將恢復 ${count} 組本機資料，並覆蓋同名資料。`))return;
+      Object.entries(data.localStorage).forEach(([k,v])=>localStorage.setItem(k,v));
+      alert('Jing’s 資料已還原，App 將重新整理。');
+      location.reload();
+    }catch(e){
+      alert('這份檔案不是有效的 Jing’s 備份，沒有變更任何資料。');
+    }finally{event.target.value='';}
+  };
+  reader.readAsText(file);
+}
+
+function toggleHistory(){const el=document.getElementById('history'); el.classList.toggle('open'); const all=dailyStore(); const keys=Object.keys(all).sort().reverse().slice(0,7); const dailyHtml=keys.length?keys.map(k=>`<p><b>${k}</b>${all[k].periodToday?'｜生理期':''}${all[k].contraceptivePill?'｜已服避孕藥':''}<br>工作：${all[k].work||''}<br>生活：${all[k].life||''}<br>靈性：${all[k].spirit||''}</p>`).join(''):'尚無每日紀錄。'; const periods=periodSummaries().slice(0,6); const periodHtml=periods.length?`<hr style="border:0;border-top:1px solid var(--line);margin:16px 0"><b>最近生理期</b>${periods.map(p=>`<p>${p.start}${p.end!==p.start?' ～ '+p.end:''}｜${p.days} 天</p>`).join('')}`:''; el.innerHTML=dailyHtml+periodHtml;}
+function countdownStore(){return loadJSON('jings_countdowns',[])}
+function saveCountdowns(items){saveJSON('jings_countdowns',items)}
+function addCountdown(){
+  const title=document.getElementById('countdownTitle').value.trim();
+  const date=document.getElementById('countdownDate').value;
+  const time=document.getElementById('countdownTime').value;
+  if(!title||!date)return;
+  const items=countdownStore();
+  items.push({id:Date.now(),title,date,time,createdAt:new Date().toISOString()});
+  saveCountdowns(items);
+  document.getElementById('countdownTitle').value='';
+  document.getElementById('countdownDate').value='';
+  document.getElementById('countdownTime').value='';
+  renderCountdowns();
+}
+function deleteCountdown(id){saveCountdowns(countdownStore().filter(x=>x.id!==id));renderCountdowns()}
+function countdownText(item){
+  const now=new Date();
+  if(!item.time){
+    const [y,m,d]=item.date.split('-').map(Number);
+    const target=new Date(y,m-1,d);
+    const todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    const diff=Math.round((target-todayStart)/86400000);
+    if(diff>1)return `還有 ${diff} 天`;
+    if(diff===1)return '明天';
+    if(diff===0)return '就是今天';
+    if(diff===-1)return '已過 1 天';
+    return `已過 ${Math.abs(diff)} 天`;
+  }
+  const target=new Date(`${item.date}T${item.time}`);
+  const diff=target-now;
+  if(diff<=0){
+    const mins=Math.floor(Math.abs(diff)/60000);
+    if(mins<60)return `已到期 ${mins} 分鐘`;
+    const hrs=Math.floor(mins/60);
+    if(hrs<24)return `已到期 ${hrs} 小時`;
+    return `已到期 ${Math.floor(hrs/24)} 天`;
+  }
+  const mins=Math.floor(diff/60000);
+  const days=Math.floor(mins/1440);
+  const hrs=Math.floor((mins%1440)/60);
+  const remMins=mins%60;
+  if(days>0)return `還有 ${days} 天 ${hrs} 小時`;
+  if(hrs>0)return `還有 ${hrs} 小時 ${remMins} 分`;
+  return `還有 ${Math.max(1,remMins)} 分鐘`;
+}
+function renderCountdowns(){
+  const root=document.getElementById('countdownList');
+  let items=countdownStore();
+  items.sort((a,b)=>{
+    const at=new Date(`${a.date}T${a.time||'00:00'}`).getTime();
+    const bt=new Date(`${b.date}T${b.time||'00:00'}`).getTime();
+    return at-bt;
+  });
+  if(!items.length){root.innerHTML='<div class="emptyState">目前沒有倒數。想記再新增就好。</div>';return}
+  root.innerHTML=items.map(item=>`<div class="countdownItem"><div class="countdownHead"><div><div class="countdownTitle">${escapeHtml(item.title)}</div><div class="countdownValue">${countdownText(item)}</div><div class="countdownDate">${item.date}${item.time?' '+item.time:''}</div></div><button class="dangerBtn" aria-label="刪除" onclick="deleteCountdown(${item.id})">×</button></div></div>`).join('');
+}
+function escapeHtml(str){return String(str).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+setupMode(); loadDaily(); bindDaily(); renderPeriod(); renderFunds(); renderCountdowns(); setInterval(renderCountdowns,60000);
+if('serviceWorker' in navigator){/* no service worker required for this simple PWA */}
+</script>
+</body>
+</html>
